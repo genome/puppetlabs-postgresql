@@ -92,10 +92,12 @@ class postgresql::server::config {
       }
     }
 
-    # We must set a "listen_addresses" line in the postgresql.conf if we
-    # want to allow any connections from remote hosts.
-    postgresql::server::config_entry { 'listen_addresses':
-      value => $listen_addresses,
+    if ($listen_addresses != false) {
+      # We must set a "listen_addresses" line in the postgresql.conf if we
+      # want to allow any connections from remote hosts.
+      postgresql::server::config_entry { 'listen_addresses':
+        value => $listen_addresses,
+      }
     }
   } else {
     file { $pg_hba_conf_path:
