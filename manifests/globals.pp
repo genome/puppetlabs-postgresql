@@ -8,8 +8,10 @@ class postgresql::globals (
   $contrib_package_name = undef,
   $devel_package_name   = undef,
   $java_package_name    = undef,
+  $perl_package_name    = undef,
   $plperl_package_name  = undef,
   $python_package_name  = undef,
+  $postgis_package_name = undef,
 
   $service_name         = undef,
   $service_provider     = undef,

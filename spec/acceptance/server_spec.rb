@@ -19,6 +19,13 @@ describe 'server:', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) 
     it { should be_listening }
   end
 
+  describe file('/var/lib/pgsql/data/pg_hba.conf') do
+    it { should be_file }
+    it { should be_owned_by 'postgres' }
+    it { should be_grouped_into 'postgres' }
+    it { should be_mode 640 }
+  end
+
   describe 'setting postgres password' do
     it 'should install and successfully adjust the password' do
       pp = <<-EOS.unindent
@@ -79,9 +86,6 @@ describe 'server without defaults:', :unless => UNSUPPORTED_PLATFORMS.include?(f
         postgresql::server::db { "postgresql_test_db":
           user     => "foo1",
           password => postgresql_password('foo1', 'foo1'),
-        }
-        postgresql::server::config_entry { 'port':
-          value => '5432',
         }
       EOS
 
@@ -171,6 +175,29 @@ describe 'server without pg_hba.conf:', :unless => UNSUPPORTED_PLATFORMS.include
 
       apply_manifest(pp, :catch_failures => true)
       apply_manifest(pp, :catch_changes => true)
+    end
+  end
+end
+
+describe 'server on alternate port:', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) do
+  after :all do
+    apply_manifest("class { 'postgresql::server': ensure => absent }", :catch_failures => true)
+  end
+
+  context 'test installing postgresql with alternate port' do
+    it 'perform installation and make sure it is idempotent' do
+      pp = <<-EOS.unindent
+        class { "postgresql::server":
+          port => 5433,
+        }
+      EOS
+
+      apply_manifest(pp, :catch_failures => true)
+      apply_manifest(pp, :catch_changes => true)
+    end
+
+    describe port(5433) do
+      it { should be_listening }
     end
   end
 end
